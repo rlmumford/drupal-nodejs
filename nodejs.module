@@ -183,16 +183,18 @@ function nodejs_send_role_message($role_name, $subject, $body) {
  */
 function nodejs_init() {
   drupal_register_shutdown_function(array('Nodejs', 'sendMessages'));
-  $_SESSION['nodejs_config'] = $nodejs_config = nodejs_get_config();
-  if (isset($nodejs_config['serviceKey'])) {
-    unset($nodejs_config['serviceKey']);
-  }
-  $socket_io_config = nodejs_get_socketio_js_config($nodejs_config);
-  drupal_add_js($socket_io_config['path'], array('type' => $socket_io_config['type']));
-  drupal_add_js(drupal_get_path('module', 'nodejs') . '/nodejs.js', array('type' => 'file'));
-  drupal_add_js(array('nodejs' => $nodejs_config), array('type' => 'setting'));
-  foreach (nodejs_get_js_handlers() as $handler_file) {
-    drupal_add_js($handler_file, array('type' => 'file'));
+  if (drupal_match_path(drupal_get_path_alias(), variable_get('nodejs_pages', '*'))) {
+    $_SESSION['nodejs_config'] = $nodejs_config = nodejs_get_config();
+    if (isset($nodejs_config['serviceKey'])) {
+      unset($nodejs_config['serviceKey']);
+    }
+    $socket_io_config = nodejs_get_socketio_js_config($nodejs_config);
+    drupal_add_js($socket_io_config['path'], array('type' => $socket_io_config['type']));
+    drupal_add_js(drupal_get_path('module', 'nodejs') . '/nodejs.js', array('type' => 'file'));
+    drupal_add_js(array('nodejs' => $nodejs_config), array('type' => 'setting'));
+    foreach (nodejs_get_js_handlers() as $handler_file) {
+      drupal_add_js($handler_file, array('type' => 'file'));
+    }
   }
 }
 

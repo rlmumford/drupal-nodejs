@@ -35,6 +35,17 @@ function nodejs_settings() {
     '#required' => TRUE,
     '#description' => t('The port of the Node.js server.'),
   );
+  $description = t("Enter one page per line as Drupal paths. The '*' character is a wildcard.
+                    Example paths are %blog for the blog page and %blog-wildcard for every personal blog.
+                    %front is the front page.",
+                    array('%blog' => 'blog', '%blog-wildcard' => 'blog/*', '%front' => '<front>'));
+  $form['server']['nodejs_pages'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Pages on which to enable nodejs'),
+    '#default_value' => variable_get('nodejs_pages', '*'),
+    '#required' => TRUE,
+    '#description' => $description,
+  );
 
   return system_settings_form($form);
 }
