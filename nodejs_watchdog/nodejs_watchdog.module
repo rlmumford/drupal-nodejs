@@ -41,7 +41,7 @@ function nodejs_watchdog_watchdog(array $entry) {
   $message = (object) array(
     'channel' => 'watchdog_dblog',
     'commands' => $commands,
-    'callback' => 'nodejsNodeAjax',
+    'callback' => 'nodejsWatchdog',
   );
   nodejs_send_content_channel_message($message);
 }
@@ -83,3 +83,21 @@ function nodejs_watchdog_theme_row($row) {
   return $output;
 }
 
+/**
+* Implements hook_nodejs_user_channels().
+*/
+function nodejs_watchdog_nodejs_user_channels($account) {
+  if (user_access('access site reports', $account)) {
+    return array('watchdog_dblog');
+  }
+  return array();
+}
+
+/**
+* Implements hook_nodejs_handlers_info().
+*/
+function nodejs_watchdog_nodejs_handlers_info() {
+  return array(
+    drupal_get_path('module', 'nodejs_watchdog') . '/nodejs.watchdog.js',
+  );
+}

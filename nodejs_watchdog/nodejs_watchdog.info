@@ -4,3 +4,4 @@ package = Nodejs
 version = VERSION
 core = 7.x
 dependencies[] = nodejs
+dependencies[] = nodejs_ajax
