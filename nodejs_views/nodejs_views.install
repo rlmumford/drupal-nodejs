@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+Function nodejs_views_schema() {
+  return array(
+    'nodejs_views' => array(
+      'description' => 'Stores views nodejs enabled.',
+      'fields' => array(
+        'vid' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'enable' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+      ),
+      'primary key' => array('vid'),
+    ),
+  );
+}
+
+/**
+ * Implement hook_install().
+ */
+function nodejs_views_install() {
+  drupal_install_schema('nodejs_views');
+}
