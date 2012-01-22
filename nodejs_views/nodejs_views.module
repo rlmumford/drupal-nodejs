@@ -53,14 +53,14 @@ function nodejs_views_init() {
                             );
   nodejs_send_content_channel_message($message);
   }
-  /* $pages = $query->fields('vd',array('vid'))
+ $pages = $query->fields('vd',array('vid'))
 			->condition('vd.display_plugin', 'nodejs_page')
 			->execute()
 			->fetchAll();
 
   foreach ($pages as $vid) {
    $view = _nodejs_views_get_view_by_vid($vid->vid);
-   $commands[] = ajax_command_replace(_nodejs_views_get_wrapper_id($vid->vid, 'nodejs_page'), _nodejs_views_get_view($vid->vid, $view->current_display));
+   $commands[] = ajax_command_html(_nodejs_views_get_wrapper_id($vid->vid, 'nodejs_page'), _nodejs_views_get_view($vid->vid, $view->current_display));
   $message = (object) array(
     'channel' => 'nodejs_views',
     'commands' => $commands,
@@ -68,7 +68,6 @@ function nodejs_views_init() {
                             );
   nodejs_send_content_channel_message($message);
   }
-  */
 }
 
 /**
@@ -150,33 +149,4 @@ function _nodejs_views_get_wrapper_id($vid, $display) {
   if ($display == 'nodejs_page')
     return variable_get('nodejs_page_wrapper'.$vid, $id);
 
-}
-
-/**
- * Menu callback: handle a variable request message from Node.js server and return it.
- */
-function nodejs_views_variable_handler() {
-
-  if (!isset($_POST['messageJson'])) {
-    drupal_json(array('error' => 'No message.'));
-    exit();
-  }
-
-  $message = json_decode($_POST['messageJson'], TRUE);
-
-  $response = array();
-  
-  switch ($message['messageType']) {
-    case 'setting':
-      // drupal_json(array('setting' => variable_get('html_replace', '')));
-      echo variable_get($message['variable'], '');
-
-      break;
-
-    default:
-  }
-  drupal_alter('nodejs_views_message_response', $response, $message);
-
- // drupal_json($response ? $response : array('error' => 'Not implemented'));
-  exit();
 }
