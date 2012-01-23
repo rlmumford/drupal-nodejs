@@ -38,10 +38,10 @@ function nodejs_views_init() {
   nodejs_send_content_channel_token('nodejs_views');
 
   $query = db_select('views_display', 'vd');
-  $blocks = $query->fields('vd',array('vid'))
-			->condition('vd.display_plugin', 'nodejs_block')
-			->execute()
-			->fetchAll();
+  $blocks = $query->fields('vd', array('vid'))
+  ->condition('vd.display_plugin', 'nodejs_block')
+  ->execute()
+  ->fetchAll();
 
   foreach ($blocks as $vid) {
    $view = _nodejs_views_get_view_by_vid($vid->vid);
@@ -53,10 +53,10 @@ function nodejs_views_init() {
                             );
   nodejs_send_content_channel_message($message);
   }
- $pages = $query->fields('vd',array('vid'))
-			->condition('vd.display_plugin', 'nodejs_page')
-			->execute()
-			->fetchAll();
+ $pages = $query->fields('vd', array('vid'))
+  ->condition('vd.display_plugin', 'nodejs_page')
+  ->execute()
+  ->fetchAll();
 
   foreach ($pages as $vid) {
    $view = _nodejs_views_get_view_by_vid($vid->vid);
@@ -96,10 +96,10 @@ function _nodejs_views_get_view($vid, $display) {
 
   $query = db_select('views_view', 'vv');
   
-  $viewname = $query->fields('vv',array('name'))
-			->condition('vv.vid', $vid)
-			->execute()
-			->fetchCol();
+  $viewname = $query->fields('vv', array('name'))
+  ->condition('vv.vid', $vid)
+  ->execute()
+  ->fetchCol();
 
   if ($viewname) {
     $view = views_get_view($viewname[0]);
@@ -121,10 +121,10 @@ function _nodejs_views_get_view_by_vid($vid) {
 
   $query = db_select('views_view', 'vv');
   
-  $viewname = $query->fields('vv',array('name'))
-			->condition('vv.vid', $vid)
-			->execute()
-			->fetchCol();
+  $viewname = $query->fields('vv', array('name'))
+  ->condition('vv.vid', $vid)
+  ->execute()
+  ->fetchCol();
 
   if ($viewname) {
     $view = views_get_view($viewname[0]);
@@ -138,15 +138,15 @@ function _nodejs_views_get_view_by_vid($vid) {
 function _nodejs_views_get_wrapper_id($vid, $display) {
 
   $query = db_select('views_view', 'vv');
-  $viewname = $query->fields('vv',array('human_name'))
-    ->condition('vv.vid', $vid)                                                         
-    ->execute()                                                                         
-    ->fetchCol();                                                                       
+  $viewname = $query->fields('vv', array('human_name'))
+  ->condition('vv.vid', $vid)                                                     
+  ->execute()                                                                         
+  ->fetchCol();                                                                       
       
   $id = '.view-' . str_replace(' ', '-', strtolower($viewname[0]));
   if ($display == 'nodejs_block')
-    return variable_get('nodejs_block_wrapper'.$vid, $id);
+    return variable_get('nodejs_block_wrapper' . $vid, $id);
   if ($display == 'nodejs_page')
-    return variable_get('nodejs_page_wrapper'.$vid, $id);
+    return variable_get('nodejs_page_wrapper' . $vid, $id);
 
 }
