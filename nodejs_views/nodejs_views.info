@@ -1,7 +1,0 @@
-name = Nodejs Views integration
-description = Adds views support to the Nodejs module
-package = Nodejs
-version = VERSION
-core = 7.x
-dependencies[] = nodejs_ajax
-dependencies[] = views
