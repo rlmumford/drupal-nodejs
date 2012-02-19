@@ -447,6 +447,23 @@ var logoutUser = function (request, response) {
 };
 
 /**
+ * Get the list of backend uids and authTokens connected to a content token channel.
+ */
+var getContentTokenChannelConnections = function (channel) {
+  var connections = {uids: [], authTokens: []};
+  for (var sessionId in tokenChannels[channel].sockets) {
+    console.log(sessionId);
+    if (io.sockets.sockets[sessionId].uid) {
+      connections.uids.push(io.sockets.sockets[sessionId].uid);
+    }
+    else {
+      connections.authTokens.push(io.sockets.sockets[sessionId].authToken);
+    }
+  }
+  return connections;
+}
+
+/**
  * Get the list of Node.js sessionIds for a given uid.
  */
 var getNodejsSessionIdsFromUid = function (uid) {
@@ -881,7 +898,12 @@ var setContentToken = function (request, response) {
     if (settings.debug) {
       console.log('setContentToken', message.token, 'for channel', message.channel);
     }
-    response.send({status: 'ok'});
+    if (message.returnConnectedSockets) {
+      response.send({status: 'ok', tokenChannelConnections: getContentTokenChannelConnections(message.channel)});
+    }
+    else {
+      response.send({status: 'ok'});
+    }
   });
 }
 
