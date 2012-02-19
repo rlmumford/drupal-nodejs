@@ -19,9 +19,8 @@ function nodejs_send_content_channel_message($message) {
  *
  * @param mixed $channel
  * @param mixed $anonymous_only
- * @param mixed $return_connected_users
  */
-function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $return_connected_users = FALSE) {
+function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE) {
   $message = (object) array(
     'token' => nodejs_generate_content_token(),
     'anonymousOnly' => $anonymous_only,
@@ -35,17 +34,13 @@ function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $r
     watchdog('nodejs', t('Error sending content token "%token" to the Node.js server: [%code] %error', $args));
     return FALSE;
   }
-  $data = drupal_json_decode($response->data);
-  if ($return_connected_users) {
-    $response->token_channel_users = $data['users'];
-  }
-  $response->token = $message->token;
 
   // We always set this in drupal.settings, even though Ajax requests will not
   // see it. It's a bit ugly, but it means that setting the tokens for full
   // page requests will just work.
   drupal_add_js(array('nodejs' => array('contentTokens' => array($channel => $message->token))), array('type' => 'setting'));
 
+  $response->token = $message->token;
   return $response;
 }
 
