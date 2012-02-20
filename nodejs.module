@@ -50,6 +50,24 @@ function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $r
 }
 
 /**
+ * Get a list of users in a content channel.
+ *
+ * @param mixed $channel
+ */
+function nodejs_get_content_channel_users($channel) {
+  $message = (object) array('channel' => $channel);
+  $response = Nodejs::getContentTokenUsers($message);
+  if (isset($response->error)) {
+    watchdog('nodejs', t('Error getting content channel users for channel "%channel". Node.js server said: [%code] %error', array('%channel' => $channel, '%code' => $response->code, '%error' => $response->error)));
+    return FALSE;
+  }
+  else {
+    $data = drupal_json_decode($response->data);
+    return $data['users'];
+  }
+}
+
+/**
  * Kick a user off the node.js server.
  *
  * @param mixed $uid
@@ -665,6 +683,16 @@ class Nodejs {
       'headers' => self::$headers,
     );
     return drupal_http_request(self::$baseUrl . 'nodejs/content/token', $options);
+  }
+
+  public static function getContentTokenUsers($message) {
+    self::initConfig();
+    $options = array(
+      'method' => 'POST',
+      'data' => drupal_json_encode($message),
+      'headers' => self::$headers,
+    );
+    return drupal_http_request(self::$baseUrl . 'nodejs/content/token/users', $options);
   }
 
   public static function kickUser($uid) {

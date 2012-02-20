@@ -992,8 +992,8 @@ server.get(settings.baseAuthPath + settings.removeUserFromChannelUrl, removeUser
 server.get(settings.baseAuthPath + settings.addChannelUrl, addChannel);
 server.get(settings.baseAuthPath + settings.removeChannelUrl, removeChannel);
 server.get(settings.baseAuthPath + settings.setUserPresenceListUrl, setUserPresenceList);
-server.get(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
-server.get(settings.baseAuthPath + settings.getContentTokenUsersUrl, getContentTokenUsers);
+server.post(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
+server.post(settings.baseAuthPath + settings.getContentTokenUsersUrl, getContentTokenUsers);
 server.post(settings.baseAuthPath + settings.contentTokenUrl, setContentToken);
 server.post(settings.baseAuthPath + settings.publishMessageToContentChannelUrl, publishMessageToContentChannel);
 server.get('*', send404);
