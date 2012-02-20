@@ -39,6 +39,7 @@ var channels = {},
       toggleDebugUrl: 'debug/toggle',
       contentTokenUrl: 'content/token',
       publishMessageToContentChannelUrl: 'content/token/message',
+      getContentTokenUsersUrl: 'content/token/users',
       extensions: [],
       clientsCanWriteToChannels: false,
       clientsCanWriteToClients: false,
@@ -241,6 +242,27 @@ var checkServiceKey = function (serviceKey) {
     return false;
   }
   return true;
+}
+
+/**
+ * Http callback - return the list of content channel users.
+ */
+var getContentTokenUsers = function (request, response) {
+  var requestBody = '';
+  request.setEncoding('utf8');
+  request.on('data', function (chunk) {
+    requestBody += chunk;
+  });
+  request.on('end', function () {
+    try {
+      var channel = JSON.parse(requestBody);
+      response.send({users: getContentTokenChannelUsers(channel.name)});
+    }
+    catch (exception) {
+      console.log('getContentTokensUsers: Invalid JSON "' + requestBody + '"', exception);
+      response.send({error: 'Invalid JSON, error: ' + e.toString()});
+    }
+  });
 }
 
 /**
@@ -449,18 +471,17 @@ var logoutUser = function (request, response) {
 /**
  * Get the list of backend uids and authTokens connected to a content token channel.
  */
-var getContentTokenChannelConnections = function (channel) {
-  var connections = {uids: [], authTokens: []};
+var getContentTokenChannelUsers = function (channel) {
+  var users = {uids: [], authTokens: []};
   for (var sessionId in tokenChannels[channel].sockets) {
-    console.log(sessionId);
     if (io.sockets.sockets[sessionId].uid) {
-      connections.uids.push(io.sockets.sockets[sessionId].uid);
+      users.uids.push(io.sockets.sockets[sessionId].uid);
     }
     else {
-      connections.authTokens.push(io.sockets.sockets[sessionId].authToken);
+      users.authTokens.push(io.sockets.sockets[sessionId].authToken);
     }
   }
-  return connections;
+  return users;
 }
 
 /**
@@ -898,8 +919,8 @@ var setContentToken = function (request, response) {
     if (settings.debug) {
       console.log('setContentToken', message.token, 'for channel', message.channel);
     }
-    if (message.returnConnectedSockets) {
-      response.send({status: 'ok', tokenChannelConnections: getContentTokenChannelConnections(message.channel)});
+    if (message.returnConnectedUsers) {
+      response.send({status: 'ok', users: getContentTokenChannelUsers(message.channel)});
     }
     else {
       response.send({status: 'ok'});
@@ -972,6 +993,7 @@ server.get(settings.baseAuthPath + settings.addChannelUrl, addChannel);
 server.get(settings.baseAuthPath + settings.removeChannelUrl, removeChannel);
 server.get(settings.baseAuthPath + settings.setUserPresenceListUrl, setUserPresenceList);
 server.get(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
+server.get(settings.baseAuthPath + settings.getContentTokenUsersUrl, getContentTokenUsers);
 server.post(settings.baseAuthPath + settings.contentTokenUrl, setContentToken);
 server.post(settings.baseAuthPath + settings.publishMessageToContentChannelUrl, publishMessageToContentChannel);
 server.get('*', send404);

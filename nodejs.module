@@ -19,14 +19,14 @@ function nodejs_send_content_channel_message($message) {
  *
  * @param mixed $channel
  * @param mixed $anonymous_only
- * @param mixed $return_connected_sockets
+ * @param mixed $return_connected_users
  */
-function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $return_connected_sockets = FALSE) {
+function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $return_connected_users = FALSE) {
   $message = (object) array(
     'token' => nodejs_generate_content_token(),
     'anonymousOnly' => $anonymous_only,
     'channel' => $channel,
-    'returnConnectedSockets' => $return_connected_sockets,
+    'returnConnectedUsers' => $return_connected_users,
   );
 
   $response = Nodejs::sendContentToken($message);
@@ -36,8 +36,8 @@ function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $r
     return FALSE;
   }
   $data = drupal_json_decode($response->data);
-  if ($return_connected_sockets) {
-    $response->token_channel_connections = $data['tokenChannelConnections'];
+  if ($return_connected_users) {
+    $response->token_channel_users = $data['users'];
   }
   $response->token = $message->token;
 
@@ -46,9 +46,7 @@ function nodejs_send_content_channel_token($channel, $anonymous_only = FALSE, $r
   // page requests will just work.
   drupal_add_js(array('nodejs' => array('contentTokens' => array($channel => $message->token))), array('type' => 'setting'));
 
-  // We return the response with the token and connections, so that calling
-  // code can use it for Ajax requests.
-  return $message->token;
+  return $response;
 }
 
 /**
