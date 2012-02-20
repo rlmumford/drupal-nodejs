@@ -256,7 +256,7 @@ var getContentTokenUsers = function (request, response) {
   request.on('end', function () {
     try {
       var channel = JSON.parse(requestBody);
-      response.send({users: getContentTokenChannelUsers(channel.name)});
+      response.send({users: getContentTokenChannelUsers(channel.channel)});
     }
     catch (exception) {
       console.log('getContentTokensUsers: Invalid JSON "' + requestBody + '"', exception);
