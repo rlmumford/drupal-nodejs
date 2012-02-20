@@ -260,7 +260,7 @@ var getContentTokenUsers = function (request, response) {
     }
     catch (exception) {
       console.log('getContentTokensUsers: Invalid JSON "' + requestBody + '"', exception);
-      response.send({error: 'Invalid JSON, error: ' + e.toString()});
+      response.send({error: 'Invalid JSON, error: ' + exception.toString()});
     }
   });
 }
