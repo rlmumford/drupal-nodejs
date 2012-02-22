@@ -20,7 +20,7 @@ Drupal.Nodejs.runCallbacks = function (message) {
     return;
   }
 
-  if (message.callback && $.isFunction(Drupal.Nodejs.callbacks[message.callback].callback)) {
+  if (message.callback && Drupal.Nodejs.callbacks[message.callback] && $.isFunction(Drupal.Nodejs.callbacks[message.callback].callback)) {
     try {
       Drupal.Nodejs.callbacks[message.callback].callback(message);
     }
