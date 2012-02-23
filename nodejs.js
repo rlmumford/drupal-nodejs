@@ -36,6 +36,16 @@ Drupal.Nodejs.runCallbacks = function (message) {
       }
     });
   }
+  else if (message.contentChannelNotification != undefined) {
+    $.each(Drupal.Nodejs.contentChannelNotificationCallbacks, function () {
+      if ($.isFunction(this.callback)) {
+        try {
+          this.callback(message);
+        }
+        catch (exception) {}
+      }
+    });
+  }
   else {
     $.each(Drupal.Nodejs.callbacks, function () {
       if ($.isFunction(this.callback)) {

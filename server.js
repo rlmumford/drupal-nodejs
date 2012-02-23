@@ -866,10 +866,51 @@ var cleanupSocket = function (socket) {
   }
 
   for (var tokenChannel in tokenChannels) {
-    delete tokenChannels[tokenChannel].sockets[socket.id];
+    if (tokenChannels[tokenChannel].sockets[socket.id]) {
+      if (tokenChannels[tokenChannel].sockets[socket.id].notifyOnDisconnect) {
+        if (contentChannelTimeoutIds[tokenChannel + '_' + uid]) {
+          clearTimeout(contentChannelTimeoutIds[tokenChannel + '_' + uid]);
+        }
+        contentChannelTimeoutIds[tokenChannel + '_' + uid] = setTimeout(checkTokenChannelStatus, 2000, tokenChannel, uid);
+      }
+      delete tokenChannels[tokenChannel].sockets[socket.id];
+    }
   }
 
   delete io.sockets.sockets[socket.id];
+}
+
+/**
+ * Check for any open sockets associated with the channel and uid pair.
+ */
+var checkTokenChannelStatus = function (tokenChannel, uid) {
+  // If the tokenChannel no longer exists, just bail.
+  if (!tokenChannels[tokenChannel]) {
+    return;
+  }
+
+  // If we find a socket for this user in the given tokenChannel, we can just
+  // return, as there's nothing we need to do.
+  var sessionIds = getNodejsSessionIdsFromUid(uid);
+  for (var i = 0; i < sessionIds.length; i++) {
+    if (tokenChannels[tokenChannel].sockets[sessionIds[i]]) {
+      return;
+    }
+  }
+
+  // We didn't find a socket for this uid, and we have other sockets in this,
+  // channel, so send disconnect notification message.
+  var message = {
+    'channel': tokenChannel,
+    'contentChannelNotification': true,
+    'data': {
+      'uid': uid,
+      'type': 'disconnect',
+    }
+  };
+  for (var socketId in tokenChannels[tokenChannel].sockets) {
+    publishMessageToClient(socketId, message);
+  }
 }
 
 /**
@@ -915,16 +956,11 @@ var setContentToken = function (request, response) {
       return;
     }
     tokenChannels[message.channel] = tokenChannels[message.channel] || {'tokens': {}, 'sockets': {}};
-    tokenChannels[message.channel].tokens[message.token] = true;
+    tokenChannels[message.channel].tokens[message.token] = message;
     if (settings.debug) {
       console.log('setContentToken', message.token, 'for channel', message.channel);
     }
-    if (message.returnConnectedUsers) {
-      response.send({status: 'ok', users: getContentTokenChannelUsers(message.channel)});
-    }
-    else {
-      response.send({status: 'ok'});
-    }
+    response.send({status: 'ok'});
   });
 }
 
@@ -957,7 +993,7 @@ var setupClientConnection = function (sessionId, authData, contentTokens) {
 
     clientToken = contentTokens[tokenChannel];
     if (tokenChannels[tokenChannel].tokens[clientToken]) {
-      tokenChannels[tokenChannel].sockets[sessionId] = true;
+      tokenChannels[tokenChannel].sockets[sessionId] = tokenChannels[tokenChannel].tokens[clientToken];
       if (settings.debug) {
         console.log('Added token', clientToken, 'for channel', tokenChannel, 'for socket', sessionId);
       }
