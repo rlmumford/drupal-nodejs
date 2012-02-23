@@ -17,6 +17,7 @@ var channels = {},
     authenticatedClients = {},
     onlineUsers = {},
     presenceTimeoutIds = {},
+    contentChannelTimeoutIds = {},
     tokenChannels = {},
     settingsDefaults = {
       scheme: 'http',
@@ -866,12 +867,14 @@ var cleanupSocket = function (socket) {
   }
 
   for (var tokenChannel in tokenChannels) {
+    console.log("cleanupSocket: checking tokenChannel", tokenChannel, socket.id);
     if (tokenChannels[tokenChannel].sockets[socket.id]) {
+      console.log("cleanupSocket: found socket.id for tokenChannel", tokenChannel, tokenChannels[tokenChannel].sockets[socket.id]);
       if (tokenChannels[tokenChannel].sockets[socket.id].notifyOnDisconnect) {
         if (contentChannelTimeoutIds[tokenChannel + '_' + uid]) {
           clearTimeout(contentChannelTimeoutIds[tokenChannel + '_' + uid]);
         }
-        contentChannelTimeoutIds[tokenChannel + '_' + uid] = setTimeout(checkTokenChannelStatus, 2000, tokenChannel, uid);
+        contentChannelTimeoutIds[tokenChannel + '_' + uid] = setTimeout(checkTokenChannelStatus, 2000, tokenChannel, socket);
       }
       delete tokenChannels[tokenChannel].sockets[socket.id];
     }
@@ -881,19 +884,21 @@ var cleanupSocket = function (socket) {
 }
 
 /**
- * Check for any open sockets associated with the channel and uid pair.
+ * Check for any open sockets associated with the channel and socket pair.
  */
-var checkTokenChannelStatus = function (tokenChannel, uid) {
+var checkTokenChannelStatus = function (tokenChannel, socket) {
   // If the tokenChannel no longer exists, just bail.
   if (!tokenChannels[tokenChannel]) {
+    console.log("checkTokenChannelStatus: no tokenChannel", tokenChannel, socket.uid);
     return;
   }
 
   // If we find a socket for this user in the given tokenChannel, we can just
   // return, as there's nothing we need to do.
-  var sessionIds = getNodejsSessionIdsFromUid(uid);
+  var sessionIds = getNodejsSessionIdsFromUid(socket.uid);
   for (var i = 0; i < sessionIds.length; i++) {
     if (tokenChannels[tokenChannel].sockets[sessionIds[i]]) {
+      console.log("checkTokenChannelStatus: found socket for tokenChannel", tokenChannel, socket.uid);
       return;
     }
   }
@@ -904,7 +909,7 @@ var checkTokenChannelStatus = function (tokenChannel, uid) {
     'channel': tokenChannel,
     'contentChannelNotification': true,
     'data': {
-      'uid': uid,
+      'uid': socket.uid,
       'type': 'disconnect',
     }
   };
