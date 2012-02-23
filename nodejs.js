@@ -1,7 +1,13 @@
 
 (function ($) {
 
-Drupal.Nodejs = Drupal.Nodejs || {'presenceCallbacks': {}, 'callbacks': {}, 'socket': false, 'connectionSetupHandlers': {}};
+Drupal.Nodejs = Drupal.Nodejs || {
+  'contentChannelNotificationCallbacks': {},
+  'presenceCallbacks': {},
+  'callbacks': {},
+  'socket': false,
+  'connectionSetupHandlers': {}
+};
 
 Drupal.behaviors.nodejs = {
   attach: function (context, settings) {
