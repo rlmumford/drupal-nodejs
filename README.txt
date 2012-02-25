@@ -3,56 +3,53 @@ Node.js integration
 
 This module adds Node.js integration to Drupal.
 
-It is currently alpha software, use at your own risk. It may eat your lunch and kill your kittens.
-
 Setup
 =====
 
-Node.js server on Ubuntu:
+1. Install Node.js.
 
-1. Make sure you have the prerequisites in your ubuntu
+1a. Install from a package manager:
+https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
 
-        sudo apt-get install build-essential git curl openssl libssl-dev -y
+1b. Build from source on Ubuntu (and probably Debian):
 
-2. Install Node.js.
+  sudo apt-get install build-essential git curl openssl libssl-dev
+  mkdir -p ~/local/src
+  cd ~/local/src
+  git clone --branch v0.6 git://github.com/joyent/node.git
+  cd node
+  ./configure
+  make
+  sudo make install
 
-        mkdir -p ~/local/src && cd ~/local/src && git clone git://github.com/joyent/node.git && cd node && ./configure && make && sudo make install
+2. Install required Node.js modules with the Node Package Manager (NPM).
 
-3. Install [npm](http://npmjs.org/) and run `npm install` (our server relies on
-   [Socket.io](http://socket.io/), [connect](http://senchalabs.github.com/connect/),
-   and [express](http://expressjs.com/)).
+Make sure you are in the nodejs module directory - NPM needs the package.json
+file that comes with the nodejs module to install the right modules.
 
-        sudo curl http://npmjs.org/install.sh | sh
-        cd /into/the/nodejs/drupalmodule
-        npm install
+  cd path/to/your/nodejs/module/directory
+  npm install
 
-4. Optionally, copy 'server.js' to a directory specific to the Node.js server used by Drupal.
+3. Create a 'nodejs.config.js' file in your nodejs module directory.
 
-5. Activate the nodejs module and optionally sub-modules.
+Read the 'nodejs.config.js.example' file. A basic configuration can be as simple as:
 
-6. Optionally, copy 'server.js' to a directory specific to the Node.js server used by Drupal.
+settings = {
+  host: '*',
+  serviceKey: 'CHANGE ME',
+  backend: {
+    port: 80,
+    host: 'CHANGE ME TO THE HOSTNAME OF YOUR DRUPAL SITE',
+    scheme: 'http',
+    basePath: '',
+    messagePath: '/nodejs/message'
+  },
+  debug: true
+};
 
-7. Configure nodejs at your Drupal page: Administration > Configuration > Node.js
+Set debug to false when you are happy with your setup.
 
-8. If you enabled the nodejs_config module, set the fields and save it.
-   or copy 'nodejs.config.js.example' to 'nodejs.config.js' (in the same
-   directory where server.js is located). Edit the values to taste.
+4. Run the node server with the command: node server.js
 
-9. Run the node server with the command: node server.js
+As long as you have 'debug: true' in your configuration file, you'll see lots of helpful messages.
 
-11. ...
-
-12. Profit!
-
-Useful links:
-
-  - how to turn nodejs into a service http://kevin.vanzonneveld.net/techblog/article/run_nodejs_as_a_service_on_ubuntu_karmic/
-
-Troubleshooting:
-
-  - If running node server.js returns an error:
-    - Check your versions of Express and Connect. This module works with Connect 1.1.4 and Express 2.4.3,
-      which are NOT the versions npm (node package manager) installs by default.
-      You may need to roll these back, which can be done with npm, using these commands:
-        - npm install connect@1.1.4
-        - npm install express@2.4.3
