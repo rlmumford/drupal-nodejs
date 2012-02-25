@@ -1,7 +1,7 @@
 {
   "name": "Drupal-Node.js",
   "description": "Push notifications from Drupal.",
-  "version": "0.0.0",
+  "version": "1.0.0-rc1",
   "homepage": "https://drupal.org/project/nodejs",
   "engines": {
     "node": ">=0.6.11"
