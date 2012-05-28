@@ -1016,10 +1016,14 @@ var setupClientConnection = function (sessionId, authData, contentTokens) {
 
 var server;
 if (settings.scheme == 'https') {
-  server = express.createServer({
+  var sslOptions = {
     key: fs.readFileSync(settings.sslKeyPath),
     cert: fs.readFileSync(settings.sslCertPath)
-  });
+  };
+  if (settings.sslCAPath) {
+    sslOptions.ca = fs.readFileSync(settings.sslCAPath);
+  }
+  server = express.createServer(sslOptions);
 }
 else {
   server = express.createServer();

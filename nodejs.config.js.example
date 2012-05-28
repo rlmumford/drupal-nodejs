@@ -33,6 +33,8 @@
  * sslCertPath: File system path to a certificate used for https communication with the
  * server and clients.
  *
+ * sslCAPath: File system path to a file containing trusted certificates.
+ *
  * publishUrl: http path on which the node server should accept messages from
  * the Drupal site.
  *
@@ -82,6 +84,7 @@ settings = {
   debug: false,
   sslKeyPath: '',
   sslCertPath: '',
+  sslCAPath: '',
   baseAuthPath: '/nodejs/',
   publishUrl: 'publish',
   kickUserUrl: 'user/kick/:uid',
