@@ -9,20 +9,27 @@ Setup
 1. Install Node.js.
 
 1a. Install from a package manager:
+
 https://github.com/joyent/node/wiki/Installing-Node.js-via-package-manager
 
 1b. Build from source on Ubuntu (and probably Debian):
 
+NOTE: replace the 'x' in v0.8.x with the current latest stable version.
+
   sudo apt-get install build-essential git curl openssl libssl-dev
   mkdir -p ~/local/src
   cd ~/local/src
-  git clone --branch v0.6 git://github.com/joyent/node.git
+  git clone --branch v0.8.x git://github.com/joyent/node.git
   cd node
   ./configure
   make
   sudo make install
 
 2. Install required Node.js modules with the Node Package Manager (NPM).
+
+OPTIONAL: install node-gyp, so that the ws package is faster.
+
+  npm install -g node-gyp
 
 Make sure you are in the nodejs module directory - NPM needs the package.json
 file that comes with the nodejs module to install the right modules.
