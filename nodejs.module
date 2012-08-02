@@ -660,6 +660,7 @@ class Nodejs {
   public static function sendContentTokenMessage($message) {
     self::initConfig();
     $message->clientSocketId = nodejs_get_client_socket_id();
+    drupal_alter('nodejs_content_channel_message', $message);
     $options = array(
       'method' => 'POST',
       'data' => drupal_json_encode($message),
