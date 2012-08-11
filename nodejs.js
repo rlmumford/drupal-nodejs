@@ -25,12 +25,19 @@ Drupal.Nodejs.runCallbacks = function (message) {
   if (message.clientSocketId == Drupal.Nodejs.socket.socket.sessionid) {
     return;
   }
-
-  if (message.callback && Drupal.Nodejs.callbacks[message.callback] && $.isFunction(Drupal.Nodejs.callbacks[message.callback].callback)) {
-    try {
-      Drupal.Nodejs.callbacks[message.callback].callback(message);
+  if (message.callback) {
+    if (typeof message.callback == 'string') {
+      message.callback = [message.callback];
     }
-    catch (exception) {}
+    $.each(message.callback, function () {
+      var callback = this;
+      if (Drupal.Nodejs.callbacks[callback] && $.isFunction(Drupal.Nodejs.callbacks[callback].callback)) {
+        try {
+          Drupal.Nodejs.callbacks[callback].callback(message);
+        }
+        catch (exception) {}
+      }
+    });
   }
   else if (message.presenceNotification != undefined) {
     $.each(Drupal.Nodejs.presenceCallbacks, function () {
