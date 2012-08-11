@@ -461,7 +461,11 @@ function nodejs_message_handler() {
  * Checks the given key to see if it matches a valid session.
  */
 function nodejs_auth_check($message) {
-  $uid = db_query("SELECT uid FROM {sessions} WHERE MD5(sid) = :auth_key", array(':auth_key' => $message['authToken']))->fetchField();
+  $nodejs_auth_check_callback = variable_get('nodejs_auth_check_callback', 'nodejs_auth_check_callback');
+  if (!function_exists($nodejs_auth_check_callback)) {
+    throw new Exception("No nodejs_auth_check callback found - looked for '$nodejs_auth_check_callback'.");
+  }
+  $uid = $nodejs_auth_check_callback($message['authToken']);
   $auth_user = $uid > 0 ? user_load($uid) : drupal_anonymous_user();
   $auth_user->authToken = $message['authToken'];
   $auth_user->nodejsValidAuthToken = $uid !== FALSE;
@@ -490,6 +494,31 @@ function nodejs_auth_check($message) {
     $auth_user->contentTokens = isset($message['contentTokens']) ? $message['contentTokens'] : array();
   }
   return $auth_user;
+}
+
+/**
+ * Default Node.js auth check callback implementation.
+ */
+function nodejs_auth_check_callback($auth_token) {
+  return db_query("SELECT uid FROM {sessions} WHERE MD5(sid) = :auth_key", array(':auth_key' => $auth_token))->fetchField();
+}
+
+/**
+ * Get an auth token for the current user.
+ */
+function nodejs_auth_get_token() {
+  $nodejs_auth_get_token_callback = variable_get('nodejs_auth_get_token_callback', 'nodejs_auth_get_token_callback');
+  if (!function_exists($nodejs_auth_get_token_callback)) {
+    throw new Exception("Cannot proceed without a valid nodejs_auth_get_token callback - looked for '$nodejs_auth_get_token_callback'.");
+  }
+  return $nodejs_auth_get_token_callback();
+}
+
+/**
+ * Default nodejs_auth_get_token() implementation.
+ */
+function nodejs_auth_get_token_callback() {
+  return md5(session_id());
 }
 
 /**
