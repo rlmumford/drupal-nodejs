@@ -1,7 +1,5 @@
 /**
  * Provides Node.js - Drupal integration.
- *
- * This code is beta quality.
  */
 
 var request = require('request'),
@@ -257,11 +255,17 @@ var getContentTokenUsers = function (request, response) {
   request.on('end', function () {
     try {
       var channel = JSON.parse(requestBody);
-      response.send({users: getContentTokenChannelUsers(channel.channel)});
     }
     catch (exception) {
       console.log('getContentTokensUsers: Invalid JSON "' + requestBody + '"', exception);
       response.send({error: 'Invalid JSON, error: ' + exception.toString()});
+    }
+    try {
+      response.send({users: getContentTokenChannelUsers(channel.channel)});
+    }
+    catch (exception) {
+      console.log('getContentTokensUsers:', exception);
+      response.send({error: 'Error calling getContentTokenChannelUsers() for channel "' + channel.channel + '", error: ' + exception.toString()});
     }
   });
 }
