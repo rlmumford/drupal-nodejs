@@ -90,10 +90,10 @@ Drupal.Nodejs.connect = function () {
      return false;
   }
   Drupal.Nodejs.socket = io.connect(url, {'connect timeout': Drupal.settings.nodejs.connectTimeout});
+  Drupal.Nodejs.socket.on('message', Drupal.Nodejs.runCallbacks);
   Drupal.Nodejs.socket.on('connect', function() {
     Drupal.Nodejs.sendAuthMessage();
     Drupal.Nodejs.runSetupHandlers('connect');
-    Drupal.Nodejs.socket.on('message', Drupal.Nodejs.runCallbacks);
 
     if (Drupal.ajax != undefined) {
       // Monkey-patch Drupal.ajax.prototype.beforeSerialize to auto-magically
