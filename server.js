@@ -49,8 +49,8 @@ var channels = {},
         host: 'localhost',
         scheme: 'http',
         port: 80,
-        basePath: '',
-        messagePath: '/nodejs/message'
+        basePath: '/',
+        messagePath: 'nodejs/message'
       },
       logLevel: 1
     },
@@ -109,7 +109,7 @@ var channelIsClientWritable = function (channel) {
  */
 var getBackendUrl = function () {
   return settings.backend.scheme + '://' + settings.backend.host + ':' +
-         settings.backend.port + settings.backend.messagePath;
+         settings.backend.port + settings.backend.basePath + settings.backend.messagePath;
 }
 
 /**
@@ -122,7 +122,7 @@ var sendMessageToBackend = function (message, callback) {
   });
 
   var options = {
-    uri: settings.backend.scheme + '://' + settings.backend.host + ':' + settings.backend.port + settings.backend.messagePath,
+    uri: getBackendUrl(),
     body: requestBody,
     headers: {
       'Content-Length': Buffer.byteLength(requestBody),

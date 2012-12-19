@@ -47,7 +47,7 @@
  *  -- messagePath: http path on which the Drupal node.js module listens for
  *  messages from the Node.js server process.
  *
- *  -- basePath: the base path of your backend site, defaults to ''.
+ *  -- basePath: the base path of your backend site, defaults to '/'.
  *
  *  -- scheme: either 'http' or 'https', defaults to 'http'.
  *
