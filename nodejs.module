@@ -672,6 +672,8 @@ class Nodejs {
       'method' => 'POST',
       'data' => drupal_json_encode($message),
       'headers' => self::$headers,
+      // This is server to server, so start with a low default timeout.
+      'timeout' => !empty(self::$config['timeout']) ? self::$config['timeout'] : 5,
     );
     return drupal_http_request(self::$baseUrl . 'nodejs/publish', $options);
   }
