@@ -620,7 +620,7 @@ var addAuthTokenToChannel = function (request, response) {
  */
 var addClientToChannel = function (sessionId, channel) {
   if (sessionId && channel) {
-    if (!/^[0-9]+$/.test(sessionId) || !io.sockets.sockets.hasOwnProperty(sessionId)) {
+    if (!/^[0-9a-z_-]+$/i.test(sessionId) || !io.sockets.sockets.hasOwnProperty(sessionId)) {
       console.log("addClientToChannel: Invalid sessionId: " + sessionId);
     }
     else if (!/^[a-z0-9_]+$/i.test(channel)) {
@@ -800,7 +800,7 @@ var removeAuthTokenFromChannel = function (request, response) {
  */
 var removeClientFromChannel = function (sessionId, channel) {
   if (sessionId && channel) {
-    if (!/^[0-9]+$/.test(sessionId) || !io.sockets.sockets.hasOwnProperty(sessionId)) {
+    if (!/^[0-9a-z_-]+$/i.test(sessionId) || !io.sockets.sockets.hasOwnProperty(sessionId)) {
       console.log("removeClientFromChannel: Invalid sessionId: " + sessionId);
     }
     else if (!/^[a-z0-9_]+$/i.test(channel) || !channels.hasOwnProperty(channel)) {
