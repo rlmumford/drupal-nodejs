@@ -297,6 +297,28 @@ function nodejs_get_add_channel($channel) {
 }
 
 /**
+ * Checks whether a channel exists on the Node.js server.
+ *
+ * @param channel
+ * @return boolean
+ *  TRUE if the specified channel exists on the Node.js server, FALSE otherwise.
+ */
+function nodejs_get_check_channel($channel) {
+  $response = Nodejs::checkChannel($channel);
+  if (isset($response->error)) {
+    watchdog('nodejs', t('Error checking channel on the Node.js server: [%code] %error', array('%code' => $response->code, '%error' => $response->error)));
+    return FALSE;
+  }
+  else {
+    $response_data = json_decode($response->data);
+    if ($response_data->status == 'success') {
+      return $response_data->result;
+    }
+    return FALSE;
+  }
+}
+
+/**
  * Remove a channel from the Node.js server.
  *
  * @param channel
@@ -739,6 +761,11 @@ class Nodejs {
   public static function addChannel($channel) {
     self::initConfig();
     return drupal_http_request(self::$baseUrl . "nodejs/channel/add/$channel", array('headers' => self::$headers));
+  }
+
+  public static function checkChannel($channel) {
+    self::initConfig();
+    return drupal_http_request(self::$baseUrl . "nodejs/channel/check/$channel", array('headers' => self::$headers));
   }
 
   public static function removeChannel($channel) {

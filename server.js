@@ -31,6 +31,7 @@ var channels = {},
       addUserToChannelUrl: 'user/channel/add/:channel/:uid',
       removeUserFromChannelUrl: 'user/channel/remove/:channel/:uid',
       addChannelUrl: 'channel/add/:channel',
+      checkChannelUrl: 'channel/check/:channel',
       removeChannelUrl: 'channel/remove/:channel',
       setUserPresenceListUrl: 'user/presence-list/:uid/:uidList',
       addAuthTokenToChannelUrl: 'authtoken/channel/add/:channel/:uid',
@@ -700,6 +701,33 @@ var addChannel = function (request, response) {
 }
 
 /**
+ * Checks whether a channel exists.
+ */
+var checkChannel = function (request, response) {
+  var channel = request.params.channel || '';
+  if (channel) {
+    if (!/^[a-z0-9_]+$/i.test(channel)) {
+      console.log('Invalid channel: ' + channel);
+      response.send({'status': 'failed', 'error': 'Invalid channel name.'});
+      return;
+    }
+    if (channels[channel]) {
+      console.log("Channel name '" + channel + "' is active on the server.");
+      response.send({'status': 'success', 'result': true});
+      return;
+    }
+    else {
+      console.log("Channel name '" + channel + "' is not active on the server.");
+      response.send({'status': 'success', 'result': false});
+    }
+  }
+  else {
+    console.log("Missing channel");
+    response.send({'status': 'failed', 'error': 'Invalid data: missing channel'});
+  }
+}
+
+/**
  * Remove a user from a channel.
  */
 var removeUserFromChannel = function (request, response) {
@@ -1039,6 +1067,7 @@ server.get(settings.baseAuthPath + settings.logoutUserUrl, logoutUser);
 server.get(settings.baseAuthPath + settings.addUserToChannelUrl, addUserToChannel);
 server.get(settings.baseAuthPath + settings.removeUserFromChannelUrl, removeUserFromChannel);
 server.get(settings.baseAuthPath + settings.addChannelUrl, addChannel);
+server.get(settings.baseAuthPath + settings.checkChannelUrl, checkChannel);
 server.get(settings.baseAuthPath + settings.removeChannelUrl, removeChannel);
 server.get(settings.baseAuthPath + settings.setUserPresenceListUrl, setUserPresenceList);
 server.post(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
