@@ -1120,7 +1120,7 @@ io.sockets.on('connection', function(socket) {
 
       // No channel, so this message is destined for one or more clients. Check
       // that this is allowed in the server configuration.
-      if (settings.clientsCanWriteToClients) {
+      else if (settings.clientsCanWriteToClients) {
         process.emit('client-message', socket.id, message);
       }
       else if (settings.debug) {
