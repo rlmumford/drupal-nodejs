@@ -17,12 +17,14 @@
  *   called "mymodule_nodejs_message_callback", will have to implement that
  *   function as follows:
  *
- *   function mymodule_nodejs_message_callback($message, &$response) {
+ *   function mymodule_message_handler($message, &$response) {
  *     // Do whatever is needed with the message received.
  *     tell_mom_about_the_message($message);
  *
  *     // Tell something back to the Node JS server.
- *     $response = 'Thanks, I just told my mom about this!';
+ *     $response = array(
+ *       'message' => 'Thanks, I just told my mom about this!';
+ *     );
  *   }
  *
  * @return array
@@ -33,7 +35,7 @@
  *   the Node JS server.
  */
 function hook_nodejs_message_callback($type) {
-  switch($type) {
+  switch ($type) {
     // Not necessarily camelCase, but since the type is set on javascript, it'll
     // be usually camelCased.
     case 'myMessageType':
@@ -56,13 +58,16 @@ function hook_nodejs_message_callback($type) {
  *
  * @param stdClass $account
  *   The Drupal account of the user for which the allowed channels are being
- *   checked.
+ *   checked. This may be an anonymous user.
  *
  * @return array
  *   An array of socket.io channels to which the user will be granted access.
  */
 function hook_nodejs_user_channels($account) {
+  // Create a channel for each authenticated user.
+  if ($account->uid > 0) {
     return array('nodejs_user_' . $account->uid);
+  }
 }
 
 /**
@@ -71,18 +76,18 @@ function hook_nodejs_user_channels($account) {
  *
  * @param stdClass $account
  *   The Drupal account of the user whose presence information access is being
- *   requested.
+ *   requested. This may be an anonymous user.
  *
  * @return array
  *   An array of User ids, representing the users that can check the presence
  *   on the Node JS server of the user specified in $account.
  */
 function hook_nodejs_user_presence_list($account) {
-  return array(
-    // Remember this is just an example ;). You probably don't want to load all
-    // users, do you? ;)
-    array_keys(user_load_multiple()),
-  );
+  if ($account->uid > 0) {
+    return array(
+      array_keys(my_module_get_friends($account)),
+    );
+  }
 }
 
 /**
@@ -101,3 +106,4 @@ function hook_nodejs_handlers_info() {
     drupal_get_path('module', 'my_nodejs_module') . '/my_nodejs_module.js',
   );
 }
+
