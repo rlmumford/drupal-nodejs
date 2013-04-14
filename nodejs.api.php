@@ -14,7 +14,7 @@
  *   site. This is set by developers when writing their server extensions.
  *
  *   As an example, a module implementing this hook, and returning a function
- *   called "mymodule_nodejs_message_callback", will have to implement that
+ *   called "mymodule_message_handler", will have to implement that
  *   function as follows:
  *
  *   function mymodule_message_handler($message, &$response) {
