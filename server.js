@@ -460,11 +460,7 @@ var logoutUser = function (request, response) {
     // Destroy any socket connections associated with this authToken.
     for (var clientId in io.sockets.sockets) {
       if (io.sockets.sockets[clientId].authToken == authToken) {
-        delete io.sockets.sockets[clientId];
-        // Delete any channel entries for this clientId.
-        for (var channel in channels) {
-          delete channels[channel].sessionIds[clientId];
-        }
+        cleanupSocket(io.sockets.sockets[clientId]);
       }
     }
     response.send({'status': 'success'});
