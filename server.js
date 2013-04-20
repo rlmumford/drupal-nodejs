@@ -51,7 +51,8 @@ var channels = {},
         scheme: 'http',
         port: 80,
         basePath: '/',
-        messagePath: 'nodejs/message'
+        messagePath: 'nodejs/message',
+        httpAuth: ''
       },
       logLevel: 1
     },
@@ -113,6 +114,13 @@ var getBackendUrl = function () {
          settings.backend.port + settings.backend.basePath + settings.backend.messagePath;
 }
 
+var getAuthHeader = function() {
+  if (settings.backend.httpAuth.length > 0) {
+    return 'Basic ' + new Buffer(settings.backend.httpAuth).toString('base64');
+  }
+  return false;
+}
+
 /**
  * Send a message to the backend.
  */
@@ -129,6 +137,11 @@ var sendMessageToBackend = function (message, callback) {
       'Content-Length': Buffer.byteLength(requestBody),
       'Content-Type': 'application/x-www-form-urlencoded'
     }
+  }
+
+  var httpAuthHeader = getAuthHeader();
+  if (httpAuthHeader !== false) {
+    options.headers.Authorization = httpAuthHeader;
   }
 
   if (settings.debug) {
@@ -1165,4 +1178,3 @@ var extensionsConfig = {
 invokeExtensions('setup', extensionsConfig);
 
 // vi:ai:expandtab:sw=2 ts=2
-
