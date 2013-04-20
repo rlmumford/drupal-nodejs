@@ -652,7 +652,7 @@ function nodejs_add_user_to_channel($uid, $channel) {
  */
 function nodejs_get_client_socket_id() {
   $client_socket_id = isset($_POST['nodejs_client_socket_id']) ? $_POST['nodejs_client_socket_id'] : '';
-  return preg_match('/^\d+$/', $client_socket_id) ? $client_socket_id : '';
+  return preg_match('/^[0-9a-z]+$/i', $client_socket_id) ? $client_socket_id : '';
 }
 
 class Nodejs {
