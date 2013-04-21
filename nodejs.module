@@ -201,7 +201,7 @@ function nodejs_send_role_message($role_name, $subject, $body) {
  */
 function nodejs_init() {
   drupal_register_shutdown_function(array('Nodejs', 'sendMessages'));
-  if (drupal_match_path(drupal_get_path_alias(), variable_get('nodejs_pages', '*'))) {
+  if (nodejs_add_js_to_page_check()) {
     $_SESSION['nodejs_config'] = $nodejs_config = nodejs_get_config();
     if (isset($nodejs_config['serviceKey'])) {
       unset($nodejs_config['serviceKey']);
@@ -214,6 +214,25 @@ function nodejs_init() {
       drupal_add_js($handler_file, array('type' => 'file'));
     }
   }
+}
+
+/**
+ * Check if we should add the node.js js to the page.
+ *
+ * We check the url, and whether or not the admin has closed down access to
+ * auth users only.
+ */
+function nodejs_add_js_to_page_check() {
+  global $user;
+
+  $valid_page = drupal_match_path(drupal_get_path_alias(), variable_get('nodejs_pages', '*'));
+  if (variable_get('nodejs_authenticated_users_only', FALSE)) {
+    $valid_user = $user->uid > 0;
+  }
+  else {
+    $valid_user = TRUE;
+  }
+  return $valid_page && $valid_user;
 }
 
 /**
