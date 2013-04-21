@@ -12,9 +12,7 @@ Drupal.Nodejs = Drupal.Nodejs || {
 Drupal.behaviors.nodejs = {
   attach: function (context, settings) {
     if (!Drupal.Nodejs.socket) {
-      if (Drupal.Nodejs.connect()) {
-        Drupal.Nodejs.sendAuthMessage();
-      }
+      Drupal.Nodejs.connect();
     }
   }
 };
@@ -90,11 +88,9 @@ Drupal.Nodejs.connect = function () {
      return false;
   }
   Drupal.Nodejs.socket = io.connect(url, {'connect timeout': Drupal.settings.nodejs.connectTimeout});
-  Drupal.Nodejs.socket.on('message', Drupal.Nodejs.runCallbacks);
   Drupal.Nodejs.socket.on('connect', function() {
     Drupal.Nodejs.sendAuthMessage();
     Drupal.Nodejs.runSetupHandlers('connect');
-
     if (Drupal.ajax != undefined) {
       // Monkey-patch Drupal.ajax.prototype.beforeSerialize to auto-magically
       // send sessionId for AJAX requests so we can exclude the current browser
@@ -107,6 +103,9 @@ Drupal.Nodejs.connect = function () {
       };
     }
   });
+
+  Drupal.Nodejs.socket.on('message', Drupal.Nodejs.runCallbacks);
+
   Drupal.Nodejs.socket.on('disconnect', function() {
     Drupal.Nodejs.runSetupHandlers('disconnect');
     if (Drupal.ajax != undefined) {
