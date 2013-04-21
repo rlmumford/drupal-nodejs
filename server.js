@@ -97,6 +97,38 @@ for (var i in settings.extensions) {
 }
 
 /**
+ * Invokes the specified function on all registered server extensions.
+ */
+var invokeExtensions = function (hook) {
+  var args = arguments.length ? Array.prototype.slice.call(arguments, 1) : [];
+  var returnValues = {};
+  for (var i in extensions) {
+    if (extensions[i].hasOwnProperty(hook) && extensions[i][hook].apply) {
+      returnValues[i] = extensions[i][hook].apply(this, args);
+    }
+  }
+  return returnValues;
+}
+
+/**
+ * Define a configuration object to pass to all server extensions at
+ * initialization. The extensions do not have access to this namespace,
+ * so we provide them with references.
+ */
+var extensionsConfig = {
+  'publishMessageToChannel': publishMessageToChannel,
+  'publishMessageToClient': publishMessageToClient,
+  'addClientToChannel': addClientToChannel,
+  'settings': settings,
+  'channels': channels,
+  'io': io,
+  'tokenChannels': tokenChannels,
+  'authenticatedClients': authenticatedClients,
+  'request': request,
+  'sendMessageToBackend': sendMessageToBackend
+};
+
+/**
  * Check if the given channel is client-writable.
  */
 var channelIsClientWritable = function (channel) {
@@ -1055,6 +1087,8 @@ var setupClientConnection = function (sessionId, authData, contentTokens) {
   }
 };
 
+invokeExtensions('setup', extensionsConfig);
+
 var server;
 if (settings.scheme == 'https') {
   var sslOptions = {
@@ -1083,6 +1117,17 @@ server.post(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
 server.post(settings.baseAuthPath + settings.getContentTokenUsersUrl, getContentTokenUsers);
 server.post(settings.baseAuthPath + settings.contentTokenUrl, setContentToken);
 server.post(settings.baseAuthPath + settings.publishMessageToContentChannelUrl, publishMessageToContentChannel);
+
+// Allow extensions to add routes.
+for (var i in extensions) {
+  if (extensions[i].hasOwnProperty('routes')) {
+    console.log('Adding route handlers from extension', extensions[i].routes);
+    for (var j = 0; j < extensions[i].routes.length; j++) {
+      server.get(extensions[i].routes[j].path, extensions[i].routes[j].handler);
+    }
+  }
+}
+
 server.get('*', send404);
 server.listen(settings.port, settings.host);
 console.log('Started ' + settings.scheme + ' server.');
@@ -1100,8 +1145,6 @@ io.configure(function () {
 });
 
 io.sockets.on('connection', function(socket) {
-  process.emit('client-connection', socket.id);
-
   socket.on('authenticate', function(message) {
     if (settings.debug) {
       console.log('Authenticating client with key "' + message.authToken + '"');
@@ -1148,33 +1191,5 @@ io.sockets.on('connection', function(socket) {
   console.log('Socket error [' + exception + ']');
 });
 
-/**
- * Invokes the specified function on all registered server extensions.
- */
-var invokeExtensions = function (hook) {
-  var args = arguments.length ? Array.prototype.slice.call(arguments, 1) : [];
-  for (var i in extensions) {
-    if (extensions[i].hasOwnProperty(hook) && extensions[i][hook].apply) {
-      extensions[i][hook].apply(this, args);
-    }
-  }
-}
-
-/**
- * Define a configuration object to pass to all server extensions at
- * initialization. The extensions do not have access to this namespace,
- * so we provide them with references.
- */
-var extensionsConfig = {
-  'publishMessageToChannel': publishMessageToChannel,
-  'publishMessageToClient': publishMessageToClient,
-  'addClientToChannel': addClientToChannel,
-  'settings': settings,
-  'channels': channels,
-  'io': io,
-  'tokenChannels': tokenChannels,
-  'sendMessageToBackend': sendMessageToBackend
-};
-invokeExtensions('setup', extensionsConfig);
-
 // vi:ai:expandtab:sw=2 ts=2
+
