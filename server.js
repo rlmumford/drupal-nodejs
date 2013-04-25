@@ -51,6 +51,7 @@ var channels = {},
         scheme: 'http',
         port: 80,
         basePath: '/',
+        strictSSL: false,
         messagePath: 'nodejs/message',
         httpAuth: ''
       },
@@ -169,6 +170,10 @@ var sendMessageToBackend = function (message, callback) {
       'Content-Length': Buffer.byteLength(requestBody),
       'Content-Type': 'application/x-www-form-urlencoded'
     }
+  }
+
+  if (settings.backend.scheme == 'https') {
+     options.strictSSL = settings.backend.strictSSL;
   }
 
   var httpAuthHeader = getAuthHeader();
