@@ -595,18 +595,19 @@ function nodejs_auth_check_callback($auth_token) {
 /**
  * Get an auth token for the current user.
  */
-function nodejs_auth_get_token() {
+function nodejs_auth_get_token($account) {
   $nodejs_auth_get_token_callback = variable_get('nodejs_auth_get_token_callback', 'nodejs_auth_get_token_callback');
   if (!function_exists($nodejs_auth_get_token_callback)) {
     throw new Exception("Cannot proceed without a valid nodejs_auth_get_token callback - looked for '$nodejs_auth_get_token_callback'.");
   }
-  return $nodejs_auth_get_token_callback();
+  return $nodejs_auth_get_token_callback($account);
 }
 
 /**
  * Default nodejs_auth_get_token() implementation.
  */
-function nodejs_auth_get_token_callback() {
+function nodejs_auth_get_token_callback($account) {
+  drupal_session_start();
   return md5(session_id());
 }
 
@@ -640,13 +641,15 @@ function nodejs_user_set_offline($uid) {
  * @return array
  */
 function nodejs_get_config() {
+  global $user;
+
   $defaults = array(
     'scheme' => variable_get('nodejs_server_scheme', 'http'),
     'secure' => variable_get('nodejs_server_scheme', 'http') == 'https' ? 1 : 0,
     'host' => variable_get('nodejs_server_host', 'localhost'),
     'port' => variable_get('nodejs_server_port', '8080'),
     'resource' => variable_get('nodejs_config_resource', '/socket.io'),
-    'authToken' => md5(session_id()),
+    'authToken' => nodejs_auth_get_token($user),
     'serviceKey' => variable_get('nodejs_service_key', ''),
     'websocketSwfLocation' => base_path() . drupal_get_path('module', 'nodejs') . '/socket_io/socket.io/support/socket.io-client/lib/vendor/web-socket-js/WebSocketMain.swf',
     'log_http_errors' => variable_get('nodejs_log_http_errors', TRUE),
