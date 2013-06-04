@@ -64,19 +64,20 @@ function nodejs_requirements($phase) {
     $message = new StdClass;
     $response = Nodejs::sendMessage($message);
 
-    // drupal_http_request does the work for us so we just check to see
-    // if it is an error or not and report back
-    // $response->error: If an error occurred, the error message. Otherwise not set. 
-    if (isset($response->error)) {
+    // Nodejs::httpRequest() does the work for us. It will return FALSE if the
+    // HTTP Request failed so we just check to see if that happened or not. If
+    // There's a response, we can connect to the server.
+    if ($response) {
       $result = array(
-        'value' => check_plain($response->error),
-        'severity' => REQUIREMENT_ERROR,
+        'value' => t('The Node.js server was successfully reached.'),
+        'severity' => REQUIREMENT_OK,
       );
     }
+    // Http request to the server failed.
     else {
       $result = array(
-        'value' => check_plain($response->status_message),
-        'severity' => REQUIREMENT_OK,
+        'value' => 'Error reaching the Node.js server. Enable HTTP error-logging and check the dblog page for more details',
+        'severity' => REQUIREMENT_ERROR,
       );
     }
 
