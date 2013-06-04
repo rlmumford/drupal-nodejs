@@ -64,7 +64,10 @@ function nodejs_get_content_channel_users($channel) {
       return FALSE;
     }
     else {
-      return $node_response->users;
+      return array(
+        'uids' => !empty($node_response->users->uids) ? $node_response->users->uids : array(),
+        'authTokens' => !empty($node_response->users->authTokens) ? $node_response->users->authTokens : array(),
+      );
     }
   }
   // Http request failed.
