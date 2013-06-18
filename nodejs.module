@@ -281,8 +281,8 @@ function nodejs_get_socketio_js_config($nodejs_config) {
     'type' => variable_get('nodejs_socket_io_type', 'external'),
   );
   if (!$socket_io_config['path']) {
-    $socket_io_config['path'] = $nodejs_config['scheme'] . '://' . $nodejs_config['host'] . ':'
-                              . $nodejs_config['port'] . $nodejs_config['resource'] . '/socket.io.js';
+    $socket_io_config['path'] = $nodejs_config['client']['scheme'] . '://' . $nodejs_config['client']['host'] . ':'
+                              . $nodejs_config['client']['port'] . $nodejs_config['resource'] . '/socket.io.js';
   }
   return $socket_io_config;
 }
@@ -647,10 +647,18 @@ function nodejs_get_config() {
   global $user;
 
   $defaults = array(
-    'scheme' => variable_get('nodejs_server_scheme', 'http'),
-    'secure' => variable_get('nodejs_server_scheme', 'http') == 'https' ? 1 : 0,
-    'host' => variable_get('nodejs_server_host', 'localhost'),
-    'port' => variable_get('nodejs_server_port', '8080'),
+    'nodejs' => array(
+      'scheme' => variable_get('nodejs_server_scheme', 'http'),
+      'secure' => variable_get('nodejs_server_scheme', 'http') == 'https' ? 1 : 0,
+      'host' => variable_get('nodejs_server_host', 'localhost'),
+      'port' => variable_get('nodejs_server_port', '8080'),
+    ),
+    'client' => array(
+      'scheme' => variable_get('nodejs_client_js_scheme', variable_get('nodejs_server_scheme', 'http')),
+      'secure' => variable_get('nodejs_client_js_scheme', variable_get('nodejs_server_scheme', 'http')) == 'https' ? 1 : 0,
+      'host' => variable_get('nodejs_client_js_host', variable_get('nodejs_server_host', 'localhost')),
+      'port' => variable_get('nodejs_client_js_port', variable_get('nodejs_server_port', '8080')),
+    ),
     'resource' => variable_get('nodejs_config_resource', '/socket.io'),
     'authToken' => nodejs_auth_get_token($user),
     'serviceKey' => variable_get('nodejs_service_key', ''),
@@ -670,7 +678,7 @@ function nodejs_get_config() {
  * @return string
  */
 function nodejs_get_url($config, $callback = '') {
-  return $config['scheme'] . '://' . $config['host'] . ':' . $config['port'] . '/' . $callback;
+  return $config['nodejs']['scheme'] . '://' . $config['nodejs']['host'] . ':' . $config['nodejs']['port'] . '/' . $callback;
 }
 
 /**
