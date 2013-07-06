@@ -112,24 +112,6 @@ var invokeExtensions = function (hook) {
 }
 
 /**
- * Define a configuration object to pass to all server extensions at
- * initialization. The extensions do not have access to this namespace,
- * so we provide them with references.
- */
-var extensionsConfig = {
-  'publishMessageToChannel': publishMessageToChannel,
-  'publishMessageToClient': publishMessageToClient,
-  'addClientToChannel': addClientToChannel,
-  'settings': settings,
-  'channels': channels,
-  'io': io,
-  'tokenChannels': tokenChannels,
-  'authenticatedClients': authenticatedClients,
-  'request': request,
-  'sendMessageToBackend': sendMessageToBackend
-};
-
-/**
  * Check if the given channel is client-writable.
  */
 var channelIsClientWritable = function (channel) {
@@ -1092,8 +1074,6 @@ var setupClientConnection = function (sessionId, authData, contentTokens) {
   }
 };
 
-invokeExtensions('setup', extensionsConfig);
-
 var server;
 if (settings.scheme == 'https') {
   var sslOptions = {
@@ -1207,6 +1187,26 @@ io.sockets.on('connection', function(socket) {
 .on('error', function(exception) {
   console.log('Socket error [' + exception + ']');
 });
+
+/**
+ * Define a configuration object to pass to all server extensions at
+ * initialization. The extensions do not have access to this namespace,
+ * so we provide them with references.
+ */
+var extensionsConfig = {
+  'publishMessageToChannel': publishMessageToChannel,
+  'publishMessageToClient': publishMessageToClient,
+  'addClientToChannel': addClientToChannel,
+  'settings': settings,
+  'channels': channels,
+  'io': io,
+  'tokenChannels': tokenChannels,
+  'authenticatedClients': authenticatedClients,
+  'request': request,
+  'server': server,
+  'sendMessageToBackend': sendMessageToBackend
+};
+invokeExtensions('setup', extensionsConfig);
 
 // vi:ai:expandtab:sw=2 ts=2
 
