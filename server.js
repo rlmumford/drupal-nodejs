@@ -1196,6 +1196,7 @@ io.sockets.on('connection', function(socket) {
 var extensionsConfig = {
   'publishMessageToChannel': publishMessageToChannel,
   'publishMessageToClient': publishMessageToClient,
+  'publishMessageToContentChannel': publishMessageToContentChannel,
   'addClientToChannel': addClientToChannel,
   'settings': settings,
   'channels': channels,
