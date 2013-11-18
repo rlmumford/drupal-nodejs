@@ -530,7 +530,16 @@ function nodejs_message_handler() {
       break;
 
     case 'userOffline':
-      nodejs_user_set_offline($message['uid']);
+      if (empty($message['uid'])) {
+        $response['error'] = 'Missing uid for userOffline message.';
+      }
+      else if (!preg_match('/^\d+$/', $message['uid'])) {
+        $response['error'] = 'Invalid (!/^\d+$/) uid for userOffline message.';
+      }
+      else {
+        nodejs_user_set_offline($message['uid']);
+        $response['message'] = "User {$message['uid']} set offline.";
+       }
       break;
 
     default:
