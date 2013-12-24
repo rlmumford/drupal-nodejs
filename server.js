@@ -59,13 +59,18 @@ var channels = {},
     },
     extensions = [];
 
+var configFile = process.cwd() + '/nodejs.config.js';
+if (process.argv[2]) {
+  configFile = process.argv[2];
+}
 try {
-  var settings = vm.runInThisContext(fs.readFileSync(process.cwd() + '/nodejs.config.js'));
+  var settings = vm.runInThisContext(fs.readFileSync(configFile));
 }
 catch (exception) {
   console.log("Failed to read config file, exiting: " + exception);
   process.exit(1);
 }
+
 for (var key in settingsDefaults) {
   if (key != 'backend' && !settings.hasOwnProperty(key)) {
     settings[key] = settingsDefaults[key];
