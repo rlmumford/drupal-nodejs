@@ -603,7 +603,8 @@ function nodejs_auth_check($message) {
  * Default Node.js auth check callback implementation.
  */
 function nodejs_auth_check_callback($auth_token) {
-  return db_query("SELECT uid FROM {sessions} WHERE MD5(sid) = :auth_key", array(':auth_key' => $auth_token))->fetchField();
+  $sql = "SELECT uid FROM {sessions} WHERE MD5(sid) = :auth_key OR MD5(ssid) = :auth_key";
+  return db_query($sql, array(':auth_key' => $auth_token))->fetchField();
 }
 
 /**
