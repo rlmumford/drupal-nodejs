@@ -1108,7 +1108,7 @@ if (settings.scheme == 'https') {
   if (settings.sslCAPath) {
     sslOptions.ca = fs.readFileSync(settings.sslCAPath);
   }
-  server = https.createServer(app, sslOptions);
+  server = https.createServer(sslOptions, app);
 }
 else {
   server = http.createServer(app);
