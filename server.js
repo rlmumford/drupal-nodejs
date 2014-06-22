@@ -45,7 +45,7 @@ var channels = {},
       extensions: [],
       clientsCanWriteToChannels: false,
       clientsCanWriteToClients: false,
-      transports: ['websocket', 'flashsocket', 'htmlfile', 'xhr-polling', 'jsonp-polling'],
+      transports: ['websocket', 'polling'],
       jsMinification: true,
       jsEtag: true,
       backend: {
