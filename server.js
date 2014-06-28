@@ -1040,13 +1040,10 @@ var setContentToken = function (request, response) {
  * Setup a sockets{}.connection with uid, channels etc.
  */
 var setupClientConnection = function (sessionId, authData, contentTokens) {
-  console.log(sockets);
   if (!sockets[sessionId]) {
     console.log("Client socket '" + sessionId + "' went away.");
-    //console.log(authData);
     return;
   }
-  console.log("Still there " + sessionId);
   sockets[sessionId].authToken = authData.authToken;
   sockets[sessionId].uid = authData.uid;
   for (var i in authData.channels) {
@@ -1091,6 +1088,7 @@ app.get(settings.baseAuthPath + settings.logoutUserUrl, logoutUser);
 app.get(settings.baseAuthPath + settings.addUserToChannelUrl, addUserToChannel);
 app.get(settings.baseAuthPath + settings.removeUserFromChannelUrl, removeUserFromChannel);
 app.get(settings.baseAuthPath + settings.addChannelUrl, addChannel);
+app.get(settings.baseAuthPath + settings.checkChannelUrl, checkChannel);
 app.get(settings.baseAuthPath + settings.removeChannelUrl, removeChannel);
 app.get(settings.baseAuthPath + settings.setUserPresenceListUrl, setUserPresenceList);
 app.post(settings.baseAuthPath + settings.toggleDebugUrl, toggleDebug);
