@@ -119,6 +119,11 @@ var invokeExtensions = function (hook) {
 }
 
 /**
+ * Allow extensions to alter the settings.
+ */
+invokeExtensions('settingsAlter', settings);
+
+/**
  * Check if the given channel is client-writable.
  */
 var channelIsClientWritable = function (channel) {
@@ -1105,6 +1110,9 @@ if (settings.scheme == 'https') {
   };
   if (settings.sslCAPath) {
     sslOptions.ca = fs.readFileSync(settings.sslCAPath);
+  }
+  if (settings.sslPassPhrase) {
+    sslOptions.passphrase = settings.sslPassPhrase;
   }
   server = https.createServer(sslOptions, app);
 }
