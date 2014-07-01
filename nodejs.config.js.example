@@ -35,6 +35,9 @@
  *
  * sslCAPath: File system path to a file containing trusted certificates.
  *
+ * sslPassPhrase: SSL passphrase, will be passed in the passphrase key to the https
+ * server if set.
+ *
  * publishUrl: http path on which the node server should accept messages from
  * the Drupal site.
  *
