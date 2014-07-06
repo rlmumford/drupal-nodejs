@@ -1194,7 +1194,7 @@ io.on('connection', function(socket) {
       // Do not let extensions using this feature accidentally allow sending
       // of messages to any socket on any channel.
       if (message.hasOwnProperty('channel')) {
-        if (channelIsClientWritable(message.channel) && clientIsInChannel(socket)) {
+        if (channelIsClientWritable(message.channel) && clientIsInChannel(socket, message.channel)) {
           process.emit('client-to-channel-message', socket.id, message);
         }
         else if (settings.debug) {
