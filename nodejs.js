@@ -20,7 +20,7 @@ Drupal.behaviors.nodejs = {
 Drupal.Nodejs.runCallbacks = function (message) {
   // It's possible that this message originated from an ajax request from the
   // client associated with this socket.
-  if (message.clientSocketId == Drupal.Nodejs.socket.sessionid) {
+  if (message.clientSocketId == Drupal.Nodejs.socket.id) {
     return;
   }
   if (message.callback) {
