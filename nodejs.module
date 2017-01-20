@@ -262,6 +262,17 @@ function nodejs_init() {
 function nodejs_add_js_to_page_check() {
   global $user;
 
+  // If the server detects a nodejs problem then do not add javacript and
+  // add an error message.
+  $message = &drupal_static(__FUNCTION__.'__error', FALSE);
+  if (!file_exists('private://.nodejs_problem')) {
+    if (!$message && ($message_text = variable_get('nodejs_unavailable_message', FALSE))) {
+      drupal_set_message($message_text, 'error');
+      $message = TRUE;
+    }
+    return FALSE;
+  }
+
   $valid_page = drupal_match_path(drupal_get_path_alias(), variable_get('nodejs_pages', '*'));
   if (variable_get('nodejs_authenticated_users_only', FALSE)) {
     $valid_user = $user->uid > 0;
@@ -879,7 +890,18 @@ class Nodejs {
 
   public static function httpRequest($url, $options) {
     self::initConfig();
+
+    // Catch and prevent requests when there are problems.
+    if (file_exists('private://.nodejs_problem')) {
+      return FALSE;
+    }
+    $options += array('timeout' => 10);
     $response = drupal_http_request(self::$baseUrl . $url, $options);
+    if ($response->code === HTTP_REQUEST_TIMEOUT) {
+      file_put_contents('private://.nodejs_problem', 'Drupal Request Timeout');
+      return FALSE;
+    }
+
     // If a http error occurred, and logging of http errors is enabled, log it.
     if (isset($response->error)) {
       if (self::$config['log_http_errors']) {
@@ -895,6 +917,7 @@ class Nodejs {
         }
         watchdog('nodejs', t($log_message, $params));
       }
+      file_put_contents('private://.nodejs_problem', 'Drupal Request Error: '.$response->error);
       return FALSE;
     }
     // No errors, so return Node.js server response.
