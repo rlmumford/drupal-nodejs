@@ -1,5 +1,8 @@
 <?php
 
+define('NODEJS_PROBLEM_FILE', 'private://.nodejs_problem');
+define('NODEJS_LAST_PROBLEM_FILE', 'private://.nodejs_last_problem');
+
 /**
  * Generate a token for a piece of content.
  */
@@ -250,6 +253,15 @@ function nodejs_init() {
     foreach (nodejs_get_js_handlers() as $handler_file) {
       drupal_add_js($handler_file, array('type' => 'file'));
     }
+
+    // Add status checking JS.
+    drupal_add_js(drupal_get_path('module', 'nodejs') . '/nodejs-status.js', array('type' => 'file'));
+    drupal_add_js(array(
+      'nodejs_status' => array(
+        'error_message' => variable_get('nodejs_unavailable_message', 'NodeJS encountered an error at @time. You must refresh the page to see any updates.'),
+        'recovery_message' => variable_get('nodejs_recovered_message', 'NodeJS recovered from an error at @time. Please refresh the page to start seeing automatic updates.'),
+      ),
+    ), array('type' => 'setting'));
   }
 }
 
@@ -265,7 +277,7 @@ function nodejs_add_js_to_page_check() {
   // If the server detects a nodejs problem then do not add javacript and
   // add an error message.
   $message = &drupal_static(__FUNCTION__.'__error', FALSE);
-  if (!file_exists('private://.nodejs_problem')) {
+  if (!file_exists(NODEJS_PROBLEM_FILE)) {
     if (!$message && ($message_text = variable_get('nodejs_unavailable_message', FALSE))) {
       drupal_set_message($message_text, 'error');
       $message = TRUE;
@@ -343,7 +355,52 @@ function nodejs_menu() {
       'access callback' => TRUE,
       'type' => MENU_CALLBACK,
     ),
+    'nodejs/status' => array(
+      'title' => 'NodeJS Status',
+      'access callback' => 'nodejs_status_access',
+      'page callback' => 'nodejs_status_page',
+      'type' => MENU_CALLBACK,
+      'theme callback' => 'ajax_base_page_theme',
+    ),
   );
+}
+
+/**
+ * Check whether the user has access to the nodejs status page.
+ */
+function nodejs_status_access() {
+  if (variable_get('nodejs_authenticated_users_only', FALSE)) {
+    return user_is_logged_in();
+  }
+  return TRUE;
+}
+
+/**
+ * Check the nodejs status.
+ */
+function nodejs_status_page() {
+  $ok = 1;
+  $recovered = 2;
+  $broken = 0;
+
+  // The time when the page being polled was initialised.
+  $init_time = !empty($_GET['initial_time']) ? $_GET['initial_time'] : 0;
+
+  $output = array(
+    'status' => $ok,
+  );
+  if (file_exists(NODEJS_PROBLEM_FILE)) {
+    $output['status'] = $broken;
+    $output['time'] = filemtime(NODEJS_PROBLEM_FILE);
+  }
+  else if (file_exists(NODEJS_LAST_PROBLEM_FILE) && (filemtime(NODEJS_LAST_PROBLEM_FILE) > $init_time)) {
+    // Send the 'recovered' status if it has been recovered since the page was initialised.
+    $output['status'] = $recovered;
+    $output['time'] = filemtime(NODEJS_LAST_PROBLEM_FILE);
+  }
+
+  print json_encode($output);
+  drupal_exit();
 }
 
 /**
@@ -892,13 +949,13 @@ class Nodejs {
     self::initConfig();
 
     // Catch and prevent requests when there are problems.
-    if (file_exists('private://.nodejs_problem')) {
+    if (file_exists(NODEJS_PROBLEM_FILE)) {
       return FALSE;
     }
     $options += array('timeout' => 10);
     $response = drupal_http_request(self::$baseUrl . $url, $options);
     if ($response->code === HTTP_REQUEST_TIMEOUT) {
-      file_put_contents('private://.nodejs_problem', 'Drupal Request Timeout');
+      file_put_contents(NODEJS_PROBLEM_FILE, 'Drupal Request Timeout');
       return FALSE;
     }
 
@@ -917,7 +974,7 @@ class Nodejs {
         }
         watchdog('nodejs', t($log_message, $params));
       }
-      file_put_contents('private://.nodejs_problem', 'Drupal Request Error: '.$response->error);
+      file_put_contents(NODEJS_PROBLEM_FILE, 'Drupal Request Error: '.$response->error);
       return FALSE;
     }
     // No errors, so return Node.js server response.
